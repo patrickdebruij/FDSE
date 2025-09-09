@@ -44,7 +44,7 @@ anim = @animate for (i, iter) in enumerate(iterations)
     b_xz = file_xz["timeseries/b/$iter"][:, 1, :];
     c_xz = file_xz["timeseries/c/$iter"][:, 1, :];
 
-# If you want an x-y slice, you can get it this way:
+    # If you want an x-y slice, you can get it this way:
     # b_xy = file_xy["timeseries/b/$iter"][:, :, 1];
 
     t = file_xz["timeseries/t/$iter"];
@@ -73,7 +73,7 @@ anim = @animate for (i, iter) in enumerate(iterations)
 end
 
 # Save the animation to a file
-mp4(anim, "gravitycurrent.mp4", fps = 20) # hide
+mp4(anim, "Project1/gravitycurrent.mp4", fps = 20) # hide
 
 # Now, make a plot of our saved variables
 # In this case, plot the buoyancy at the bottom of the domain as a function of x and t

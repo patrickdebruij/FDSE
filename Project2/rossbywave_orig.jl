@@ -17,7 +17,7 @@ Ny = 128   # number of grid points in y-direction
 # Construct a rectilinear grid that is periodic in x-direction and bounded in y-direction
 grid = RectilinearGrid(size = (Nx, Ny),
                        x = (0, Lx), y = (0, Ly),
-                       topology = (Bounded, Bounded, Flat)
+                       topology = (Periodic, Bounded, Flat)
 )
 
 # Set up a model for Rossby waves
@@ -25,7 +25,6 @@ model = NonhydrostaticModel(; grid,
               advection = UpwindBiased(),   # Specify the advection scheme.  Another good choice is WENO() which is more accurate but slower
             timestepper = :RungeKutta3,   # Set the timestepping scheme, here 3rd order Runge-Kutta
                 tracers = :c,
-                # closure = (ScalarDiffusivity(ν = 100, κ = 100)),  # set viscosity and diffusivity
                 coriolis = BetaPlane(rotation_rate = 7.292115e-5, latitude = 45, radius = 6371e3)   # set Coriolis parameter using the Beta-plane approximation 
 )
 
@@ -34,12 +33,9 @@ k = 2 * pi / 200kilometers
 l = 2 * pi / 200kilometers
 
 # Define functions for the initial conditions
-u₀ = 0.1   # units: m/s
-uᵢ(x, y) = u₀ * exp(-((x - Lx)^2 + (y - Ly / 2)^2) / (2 * (Ly / 40)^2))
-# uᵢ(x, y) = u₀ * sin(k * x) * sin(l * y)
-# vᵢ(x, y) = u₀ * (k / l) * cos(k * x) * cos(l * y)
-vᵢ(x, y) = u₀ * exp(-((x - Lx)^2 + (y - Ly / 2)^2) / (2 * (Ly / 40)^2))
-
+u₀ = 0.001   # units: m/s
+uᵢ(x, y) = u₀ * sin(k * x) * sin(l * y)
+vᵢ(x, y) = u₀ * (k / l) * cos(k * x) * cos(l * y)
 wᵢ(x, y) = 0
 cᵢ(x, y) = sin(k * x) * cos(l * y) # Here, we set the function for c so that it is proportional to the streamfunction associated with (u,v)
 

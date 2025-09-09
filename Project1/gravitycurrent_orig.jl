@@ -7,12 +7,10 @@ using Oceananigans
 # First, we need to set some physical parameters for the simulation
 # Set the domain size in non-dimensional coordinates
 Lx = 10  # size in the x-direction
-Ly = 1
 Lz = 1   # size in the vertical (z) direction 
 
 # Set the grid size
 Nx = 256  # number of gridpoints in the x-direction
-Ny = 16
 Nz = 16   # number of gridpoints in the z-direction
 
 # Some timestepping parameters
@@ -35,7 +33,7 @@ Lf = Lx / 100 # The width of the initial buoyancy step
 # construct a rectilinear grid using an inbuilt Oceananigans function
 # Here, the topology parameter sets the style of boundaries in the x, y, and z directions
 # 'Bounded' corresponds to wall-bounded directions and 'Flat' corresponds to the dimension that is not considered (here, that is the y direction)
-grid = RectilinearGrid(size = (Nx, Ny, Nz), x = (0, Lx), y=(0, Ly), z = (0, Lz), topology = (Bounded, Bounded, Bounded))
+grid = RectilinearGrid(size = (Nx, Nz), x = (0, Lx), z = (0, Lz), topology = (Bounded, Flat, Bounded))
 
 # set the boundary conditions
 # FluxBoundaryCondition specifies the momentum or buoyancy flux (in this case zero)
@@ -46,24 +44,13 @@ grid = RectilinearGrid(size = (Nx, Ny, Nz), x = (0, Lx), y=(0, Ly), z = (0, Lz),
 # by default, Oceananigans imposes no flux and no normal flow boundary conditions in bounded directions
 # hence, we could remove the following lines and get the same result, but we show them here as a demonstration
 u_bcs = FieldBoundaryConditions(top = FluxBoundaryCondition(0),
-                                bottom = FluxBoundaryCondition(0),
-                                north = FluxBoundaryCondition(0),
-                                south = FluxBoundaryCondition(0))
-v_bcs = FieldBoundaryConditions(top = FluxBoundaryCondition(0),
-                                bottom = FluxBoundaryCondition(0),
-                                west = FluxBoundaryCondition(0),
-                                east = FluxBoundaryCondition(0))
+                                bottom = FluxBoundaryCondition(0))
 w_bcs = FieldBoundaryConditions(east = FluxBoundaryCondition(0),
-                                west = FluxBoundaryCondition(0),
-                                north = FluxBoundaryCondition(0),
-                                south = FluxBoundaryCondition(0))
+                                west = FluxBoundaryCondition(0))
 b_bcs = FieldBoundaryConditions(top = FluxBoundaryCondition(0),
                                 bottom = FluxBoundaryCondition(0),
                                 east = FluxBoundaryCondition(0),
-                                west = FluxBoundaryCondition(0),
-                                north = FluxBoundaryCondition(0),
-                                south = FluxBoundaryCondition(0),)
-
+                                west = FluxBoundaryCondition(0))
 
 # Now, define a 'model' where we specify the grid, advection scheme, bcs, and other settings
 θ = 0 # clockwise positive
@@ -74,18 +61,18 @@ model = NonhydrostaticModel(; grid,
             # buoyancy = BuoyancyTracer(), # this tells the model that b will act as the buoyancy (and influence momentum) 
             buoyancy = BuoyancyForce(BuoyancyTracer(), gravity_unit_vector=(sind(θ),0,-cosd(θ))),
             closure = (ScalarDiffusivity(ν = 1 / Re, κ = 1 / Re)),  # set a constant kinematic viscosity and diffusivty, here just 1/Re since we are solving the non-dimensional equations 
-            boundary_conditions = (u = u_bcs, v = v_bcs, w = w_bcs, b = b_bcs), # specify the boundary conditions that we defiend above
+            boundary_conditions = (u = u_bcs, w = w_bcs, b = b_bcs), # specify the boundary conditions that we defiend above
             coriolis = nothing # this line tells the model not to include system rotation (no Coriolis acceleration)
 )
 
 # Set initial conditions
 # Here, we start with a tanh function for buoyancy and add a random perturbation to the velocity. 
-uᵢ(x, y, z) = kick * randn()
-vᵢ(x, y, z) = kick * randn()
-wᵢ(x, y, z) = kick * randn()
+uᵢ(x, z) = kick * randn()
+vᵢ(x, z) = 0
 
-bᵢ(x, y, z) = (Δb / 2) * (1 + tanh((x - xl) / Lf))
-cᵢ(x, y, z) = exp(-((x - Lx / 2) / (Lx / 50))^2) # Initialize with a thin tracer (dye) streak in the center of the domain
+wᵢ(x, z) = kick * randn()
+bᵢ(x, z) = (Δb / 2) * (1 + tanh((x - xl) / Lf))
+cᵢ(x, z) = exp(-((x - Lx / 2) / (Lx / 50))^2) # Initialize with a thin tracer (dye) streak in the center of the domain
 
 # Send the initial conditions to the model to initialize the variables
 set!(model, u = uᵢ, v = vᵢ, w = wᵢ, b = bᵢ, c = cᵢ)
