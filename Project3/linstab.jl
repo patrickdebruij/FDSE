@@ -40,7 +40,7 @@ end
 Rig = dbdz ./ (dudz .^ 2)
 
 # Create an x-wavenumber vector to explore solutions
-kx = LinRange(2 * pi / LX, 2 * pi * 20 / LX, 100)
+kx = LinRange(2 * pi / LX, 2 * pi * 20 / LX, 1000)
 
 sigma = complex(zeros(2*(NZ+1), length(kx)))
 lambda_w = complex(zeros(NZ+1, 2*(NZ+1), length(kx)))
@@ -50,6 +50,8 @@ for (k, k_val) in enumerate(kx)
     println("Working on wavenumber $k / $(length(kx))")
     (sigma[:, k], lambda_w[:, :, k], lambda_b[:, :, k]) = SSF(z, vel, buoy, k_val, 0, nu, kappa, [0, 0], [0, 0], 0)
 end
+
+println("Max growthrate $(maximum(real.(sigma[1, :]))) ) at kx=$(kx[argmax(real.(sigma[1, :]))])")
 
 PlotlyPlot(kx, real.(sigma[1, :]), Layout(xaxis_title="kₓ",yaxis_title="growth rate",plot_bgcolor="white",yaxis=attr(gridcolor="lightgrey",zerolinecolor="black"),xaxis=attr(gridcolor="lightgrey",zerolinecolor="black")))
 

@@ -16,6 +16,18 @@ b_ic = FieldTimeSeries(filename * ".jld2", "b", iterations = 0)
 χ_ic = FieldTimeSeries(filename * ".jld2", "χ", iterations = 0)
 ϵ_ic = FieldTimeSeries(filename * ".jld2", "ϵ", iterations = 0)
 
+u_all = FieldTimeSeries(filename * ".jld2", "u")
+v_all = FieldTimeSeries(filename * ".jld2", "v")
+w_all = FieldTimeSeries(filename * ".jld2", "w")
+t = u_all.times
+
+w_2_z = mean(w_all .^ 2, dims = (1,2,3)) * 1e4
+sig = 1.1878949574039288
+plot(t, w_2_z[:], xlabel = "time", ylabel = "⟨w²⟩", title = "Domain-averaged vertical kinetic energy", yaxis=:log)
+plot!(t, 2*pi*t*sig)
+
+savefig("w2_vs_time.png")
+
 ## Load in coordinate arrays
 ## We do this separately for each variable since Oceananigans uses a staggered grid
 xu, yu, zu = nodes(u_ic)
@@ -28,6 +40,12 @@ xϵ, yϵ, zϵ = nodes(ϵ_ic)
 
 ## Now, open the file with our data
 file_xz = jldopen(filename * ".jld2")
+
+u = file_xz["timeseries/u"]
+v = file_xz["timeseries/v"]
+w = file_xz["timeseries/w"]
+
+# w_2_z = mean(w.^2, dims=
 
 ## Extract a vector of iterations
 iterations = parse.(Int, keys(file_xz["timeseries/t"]))

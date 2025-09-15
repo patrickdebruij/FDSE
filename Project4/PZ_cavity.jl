@@ -6,13 +6,23 @@ using Printf
 include("PZ.jl")
 
 # Set the diffusion coefficient
-κₜ = 1e-4
+κₜ = 1e-4 # m^2/s
+L = 1 # m
+U = 2 # m/s
+
+tau_adv = L/U
+tau_diff = L^2/κₜ
+tau_bio = 20 # seconds, observed in the box-model and column-model runs
+
+Ra = tau_adv / tau_diff
+Pa = tau_adv / tau_bio
+Be = tau_bio / tau_diff
 
 # Set the velocity of the top boundary
-vel_top = 1.0
+vel_top = U
 
 # define the grid
-grid = RectilinearGrid(topology = (Bounded, Flat, Bounded), size = (100, 100, ), extent = (1, 1, ))
+grid = RectilinearGrid(topology = (Bounded, Flat, Bounded), size = (100, 100, ), extent = (L, L, ))
 
 # Set the boundary conditions
 u_bcs = FieldBoundaryConditions(top = ValueBoundaryCondition(vel_top), bottom = ValueBoundaryCondition(0.0))

@@ -7,7 +7,7 @@ using Printf
 include("PZ.jl")
 
 # Set the diffusion coefficient
-κₜ = 0.0
+κₜ = 0
 
 # define the grid
 grid = RectilinearGrid(topology = (Flat, Flat, Bounded), size = (100, ), extent = (1, ))
@@ -15,7 +15,7 @@ grid = RectilinearGrid(topology = (Flat, Flat, Bounded), size = (100, ), extent 
 # Specify the biogeochemical model
 biogeochemistry = PhytoplanktonZooplankton()
 # To change the e-folding decay length for the light, replace with the following
-#biogeochemistry = PhytoplanktonZooplankton(light_decay_length=0.1)
+biogeochemistry = PhytoplanktonZooplankton(light_decay_length=0.1)
 # If you want to add sinking of phytoplankton, first define a function called sinking_velocity as explained in the instructions, then call the model like this:
 # biogeochemistry = PhytoplanktonZooplankton(sinking_velocity = sinking_velocity)
 
@@ -27,7 +27,7 @@ model = NonhydrostaticModel(; grid,
 set!(model, P = 0.1, Z = 0.1)
 
 # Set up the simulation with the timestep and stop time
-simulation = Simulation(model, Δt = 0.01, stop_time = 50)
+simulation = Simulation(model, Δt = 0.01, stop_time = 200)
 
 # Create an 'output_writer' to save data periodically
 simulation.output_writers[:tracers] = JLD2Writer(model, model.tracers,
